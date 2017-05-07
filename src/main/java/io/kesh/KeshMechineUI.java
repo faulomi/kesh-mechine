@@ -7,7 +7,6 @@ import com.vaadin.ui.Grid;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
-import org.knowm.xchange.currency.*;
 import org.knowm.xchange.currency.CurrencyPair;
 import org.knowm.xchange.dto.marketdata.Ticker;
 import org.knowm.xchange.kraken.KrakenExchange;
@@ -38,7 +37,7 @@ public class KeshMechineUI extends UI {
 
         Grid<CurrencyPairTicker> currencyPairTickerGrid = new Grid<>(CurrencyPairTicker.class);
         currencyPairTickerGrid.setSizeFull();
-        currencyPairTickerGrid.setColumnOrder("exchange", "currencyPair", "ask", "volume", "bid");
+        currencyPairTickerGrid.setColumnOrder("exchange", "currencyPair", "bid", "volume", "ask");
 
         setContent(
                 new VerticalLayout(currencyPairTickerGrid, new Button("Refresh",
