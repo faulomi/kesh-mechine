@@ -112,6 +112,12 @@
             <version>4.2.0</version>
         </dependency>
 
+		<dependency>
+			<groupId>org.knowm.xchange</groupId>
+			<artifactId>xchange-therock</artifactId>
+			<version>4.2.0</version>
+		</dependency>
+
 
 
 

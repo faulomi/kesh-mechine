@@ -20,16 +20,19 @@ import java.util.stream.Stream;
 public class TickerService {
 
 
-    public Ticker getTicker(org.knowm.xchange.currency.CurrencyPair currencyPair, Class<? extends Exchange> exchangeClass) throws IOException {
+    public Stream<Ticker> getTickers(Stream<org.knowm.xchange.currency.CurrencyPair> currencyPairs, Class<? extends Exchange> exchangeClass) throws IOException {
 
         Exchange exchange = ExchangeFactory.INSTANCE.createExchange(exchangeClass.getName());
         MarketDataService marketDataService = exchange.getMarketDataService();
-        Ticker ticker = marketDataService.getTicker(currencyPair);
+        return currencyPairs.map(currencyPair -> {
+            try {
+                return marketDataService.getTicker(currencyPair);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
-        return ticker;
     }
-
-
 
 
 }
