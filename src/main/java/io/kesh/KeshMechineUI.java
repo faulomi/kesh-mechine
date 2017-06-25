@@ -10,6 +10,7 @@ import com.vaadin.ui.VerticalLayout;
 import org.knowm.xchange.currency.CurrencyPair;
 import org.knowm.xchange.dto.marketdata.Ticker;
 import org.knowm.xchange.kraken.KrakenExchange;
+import org.knowm.xchange.therock.TheRockExchange;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -25,6 +26,8 @@ public class KeshMechineUI extends UI {
 
     @Inject
     private TickerService tickerService;
+    @Inject
+    private Bx bx;
 
     private static CurrencyPairTicker map(String exchange, Ticker ticker) {
 
@@ -46,28 +49,33 @@ public class KeshMechineUI extends UI {
                                                                       clickEvent -> {
                                                                           try {
                                                                               currencyPairTickerGrid
-                                                                                      .setItems(Stream.concat(
-                                                                                              tickerService
-                                                                                                      .getTickers(
-                                                                                                              Stream.of(
-                                                                                                                      CurrencyPair.BTC_EUR,
-                                                                                                                      CurrencyPair.BTC_USD,
-                                                                                                                      CurrencyPair.ETH_EUR,
-                                                                                                                      CurrencyPair.ETH_USD),
-                                                                                                              KrakenExchange.class)
-                                                                                                      .map(ticker -> map(
-                                                                                                              "Kraken",
-                                                                                                              ticker)),tickerService
-                                                                                                      .getTickers(
-                                                                                                              Stream.of(
-                                                                                                                      CurrencyPair.BTC_EUR,
-                                                                                                                      CurrencyPair.BTC_USD,
-                                                                                                                      CurrencyPair.ETH_EUR,
-                                                                                                                      CurrencyPair.ETH_USD),
-                                                                                                              .class)
-                                                                                                      .map(ticker -> map(
-                                                                                                              "TRT",
-                                                                                                              ticker)
+                                                                                      .setItems(
+                                                                                              Stream.concat(
+                                                                                                      Stream.concat(
+                                                                                                              tickerService
+                                                                                                                      .getTickers(
+                                                                                                                              Stream.of(
+                                                                                                                                      CurrencyPair.BTC_EUR,
+                                                                                                                                      CurrencyPair.BTC_USD,
+                                                                                                                                      CurrencyPair.ETH_EUR,
+                                                                                                                                      CurrencyPair.ETH_USD),
+                                                                                                                              KrakenExchange.class)
+                                                                                                                      .map(ticker -> map(
+                                                                                                                              "Kraken",
+                                                                                                                              ticker)),
+                                                                                                              tickerService
+                                                                                                                      .getTickers(
+                                                                                                                              Stream.of(
+                                                                                                                                      CurrencyPair.BTC_EUR,
+                                                                                                                                      CurrencyPair.BTC_USD,
+                                                                                                                                      CurrencyPair.ETH_EUR),
+                                                                                                                              TheRockExchange.class)
+                                                                                                                      .map(ticker -> map(
+                                                                                                                              "TRT",
+                                                                                                                              ticker))),
+                                                                                                      bx.currencyPairTickers(
+                                                                                                              Bx.CurrencyPair.BTC_THB,
+                                                                                                              Bx.CurrencyPair.ETH_THB)));
                                                                           } catch (IOException e) {
                                                                               e.printStackTrace();
                                                                           }

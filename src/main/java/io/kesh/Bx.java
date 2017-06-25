@@ -6,12 +6,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import feign.Param;
+import java.math.BigDecimal;
+import java.util.stream.Stream;
 
 /**
  * Created by jerome on 5/6/17.
@@ -23,22 +22,56 @@ public interface Bx {
     @RequestMapping(path = "/pairing", method = RequestMethod.GET, consumes = "application/json")
     String rawCurrencyPairs();
 
+    @RequestMapping(path = "/orderbook/")
+    String orderBook(@RequestParam("pairing") int pairingId);
 
-    @RequestMapping(path = "/orderbook?pairing={pairingId}")
-    String orderBook(Long pairingId);
-
-
-    default List<CurrencyPair> currencyPairs() throws IOException {
+    default Stream<KeshMechineUI.CurrencyPairTicker> currencyPairTickers(CurrencyPair... currencyPair) throws IOException {
         ObjectMapper objectMapper = JacksonMappingConfiguration.createDefaultMapper();
-        List<CurrencyPair> pairs = new ArrayList<>();
+        return Stream.of(currencyPair).map(pair -> {
+            final JsonNode rootNode;
+            try {
+                rootNode = objectMapper.readTree(orderBook(pair.pairId));
+                BigDecimal latestBid = new BigDecimal(rootNode.get("bids").get(0).get(0).asText());
+                BigDecimal latestAsk = new BigDecimal(rootNode.get("asks").get(0).get(0).asText());
+                BigDecimal bidVolume = new BigDecimal(rootNode.get("bids").get(0).get(1).asText());
+                BigDecimal askVolume = new BigDecimal(rootNode.get("asks").get(0).get(1).asText());
 
-        final JsonNode rootNode = objectMapper.readTree(rawCurrencyPairs());
+                return new KeshMechineUI.CurrencyPairTicker(pair.toString(), latestBid, latestAsk,
+                                                            "BX",
+                                                            bidVolume.max(askVolume));
 
-        for (JsonNode pair : rootNode) {
-            pairs.add(new CurrencyPair(pair.get("primary_currency").asText(),
-                                       pair.get("secondary_currency").asText()));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+        });
+
+    }
+
+
+    enum CurrencyPair {
+
+        BTC_THB(1) {
+            @Override
+            public String toString() {
+                return "BTC/THB";
+            }
+        },
+        ETH_THB(21) {
+            @Override
+            public String toString() {
+                return "ETH/THB";
+            }
+
+        };
+
+        private final int pairId;
+
+        private CurrencyPair(int pairId) {
+            this.pairId = pairId;
         }
-        return pairs;
+
+
     }
 
 }
